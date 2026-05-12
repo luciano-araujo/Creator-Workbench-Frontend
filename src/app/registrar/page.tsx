@@ -8,49 +8,43 @@ import { useRouter } from "next/navigation";
 import { ThemeToggle } from "../../components/shared/ThemeToggle";
 import { ThemeColorPicker } from "../../components/shared/ThemeColorPicker";
 
-// ============================================================================
-// BACK-END INTEGRATION MOCKS (A serem substituídos pela API real)
-// ============================================================================
 const requestRegistrationToken = async (data: { name: string; email: string }) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Quando o Back-End chegar, ele enviará o e-mail real aqui
-      if (data.email.includes("@")) {
-        resolve({ success: true, message: "Token enviado para o e-mail." });
-      } else {
-        reject(new Error("Formato de e-mail inválido."));
-      }
-    }, 1500);
+  const response = await fetch("http://localhost:8080/api/auth/register/request-token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Erro ao solicitar código.");
+  }
+  return;
 };
 
 const verifyAndRegisterUser = async (data: { email: string; token: string; password: string }) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Quando o Back-End chegar, ele validará o token que o usuário digitou
-      if (data.token === "123456") { // Mock de um token válido
-        resolve({ token: "fake-jwt-token-123", user: { email: data.email, role: "Admin" } });
-      } else {
-        reject(new Error("Código de segurança inválido ou expirado. Tente '123456'."));
-      }
-    }, 1500);
+  const response = await fetch("http://localhost:8080/api/auth/register/confirm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Código de segurança inválido ou erro no cadastro.");
+  }
+  return response.json();
 };
-// ============================================================================
 
 export default function RegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
   
-  // Step 1 Data
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  
-  // Step 2 Data
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
 
-  // States
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +55,7 @@ export default function RegisterPage() {
 
     try {
       await requestRegistrationToken({ name, email });
-      setStep(2); // Avança para a etapa 2 com uma animação
+      setStep(2); 
     } catch (err: any) {
       setError(err.message || "Erro desconhecido ao tentar enviar o código.");
     } finally {
@@ -77,7 +71,6 @@ export default function RegisterPage() {
     try {
       const response = await verifyAndRegisterUser({ email, token, password });
       
-      // Simula o login automático do AuthGuard para ele entrar na plataforma
       document.cookie = "creator_auth_token=fake-jwt-token-123; path=/; max-age=86400";
       console.log("Cadastro de sucesso! Dados:", response);
       
@@ -95,7 +88,6 @@ export default function RegisterPage() {
       <div className="fixed top-[-10%] right-[-5%] w-[600px] h-[600px] bg-primary-light/50 dark:bg-primary-dark/20 rounded-full blur-[120px] -z-10 animate-pulse" />
       <div className="fixed bottom-[-5%] left-[-10%] w-[400px] h-[400px] bg-primary-light/30 dark:bg-zinc-900/30 rounded-full blur-[100px] -z-10" />
 
-      {/* NAVBAR */}
       <nav className="w-full h-[88px] border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-950/50 backdrop-blur-md z-50 flex items-center justify-between px-6 lg:px-12 font-sans absolute top-0 left-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -110,9 +102,7 @@ export default function RegisterPage() {
         </div>
       </nav>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col lg:flex-row pt-[88px] w-full max-w-[1600px] mx-auto">
-        {/* LEFT SECTION - Massive Typography */}
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-12 lg:px-24 pt-16 lg:pt-0 z-10">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -134,7 +124,6 @@ export default function RegisterPage() {
           </motion.div>
         </div>
 
-        {/* RIGHT SECTION - Registration Form */}
         <div className="w-full lg:w-[600px] flex items-center justify-center p-8 sm:p-12 lg:p-16 z-10 mt-8 lg:mt-0">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -236,14 +225,14 @@ export default function RegisterPage() {
                   <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded-2xl flex items-start gap-3 mb-6">
                     <MailCheck className="w-5 h-5 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-bold">Verifique sua caixa de entrada</p>
-                      <p className="text-xs opacity-80 mt-1">Enviamos um código de 6 dígitos para <strong>{email}</strong></p>
+                      <p className="text-sm font-bold">Verifique o console do Spring Boot</p>
+                      <p className="text-xs opacity-80 mt-1">O código de 6 dígitos foi gerado lá para <strong>{email}</strong></p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">
-                      Código Recebido (Use 123456 no teste)
+                      Código Recebido no Terminal
                     </label>
                     <input 
                       type="text" 
