@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, ArrowRight, AlertCircle, Plus, MailCheck } from "lucide-react";
-import { Button } from "../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { ThemeToggle } from "../../components/shared/ThemeToggle";
-import { ThemeColorPicker } from "../../components/shared/ThemeColorPicker";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { ThemeColorPicker } from "@/components/shared/ThemeColorPicker";
 
 const requestRegistrationToken = async (data: { name: string; email: string }) => {
   const response = await fetch("http://localhost:8080/api/auth/register/request-token", {
@@ -56,8 +56,9 @@ export default function RegisterPage() {
     try {
       await requestRegistrationToken({ name, email });
       setStep(2); 
-    } catch (err: any) {
-      setError(err.message || "Erro desconhecido ao tentar enviar o código.");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Erro desconhecido ao tentar enviar o código.");
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +76,9 @@ export default function RegisterPage() {
       console.log("Cadastro de sucesso! Dados:", response);
       
       router.push("/");
-    } catch (err: any) {
-      setError(err.message || "Erro desconhecido ao tentar registrar.");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Erro desconhecido ao tentar registrar.");
     } finally {
       setIsLoading(false);
     }
@@ -104,11 +106,7 @@ export default function RegisterPage() {
 
       <main className="flex-1 flex flex-col lg:flex-row pt-[88px] w-full max-w-[1600px] mx-auto">
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-12 lg:px-24 pt-16 lg:pt-0 z-10">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
+          <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
             <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/30 mb-8 lg:mb-12">
               <Plus className="w-8 h-8 text-white" />
             </div>
@@ -125,17 +123,10 @@ export default function RegisterPage() {
         </div>
 
         <div className="w-full lg:w-[600px] flex items-center justify-center p-8 sm:p-12 lg:p-16 z-10 mt-8 lg:mt-0">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="w-full max-w-[500px] bg-white dark:bg-zinc-800 p-8 sm:p-12 rounded-[2.5rem] shadow-[20px_20px_60px_#efefef] dark:shadow-none border border-white dark:border-zinc-700 hover:border-primary/20 transition-all duration-500 group"
-          >
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }} className="w-full max-w-[500px] bg-white dark:bg-zinc-800 p-8 sm:p-12 rounded-[2.5rem] shadow-[20px_20px_60px_#efefef] dark:shadow-none border border-white dark:border-zinc-700 hover:border-primary/20 transition-all duration-500 group">
             <div className="mb-8 flex justify-between items-end">
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tight font-heading dark:text-zinc-100 mb-2">
-                  Nova Credencial
-                </h2>
+                <h2 className="text-2xl font-black uppercase tracking-tight font-heading dark:text-zinc-100 mb-2">Nova Credencial</h2>
                 <div className="flex gap-2 mt-2">
                   <div className={`h-1.5 rounded-full transition-all duration-500 ${step === 1 ? 'w-12 bg-primary' : 'w-4 bg-zinc-200 dark:bg-zinc-700'}`}></div>
                   <div className={`h-1.5 rounded-full transition-all duration-500 ${step === 2 ? 'w-12 bg-primary' : 'w-4 bg-zinc-200 dark:bg-zinc-700'}`}></div>
@@ -145,13 +136,7 @@ export default function RegisterPage() {
 
             <AnimatePresence mode="wait">
               {error && (
-                <motion.div
-                  key="error"
-                  initial={{ opacity: 0, height: 0, y: -10 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -10 }}
-                  className="overflow-hidden mb-5"
-                >
+                <motion.div key="error" initial={{ opacity: 0, height: 0, y: -10 }} animate={{ opacity: 1, height: "auto", y: 0 }} exit={{ opacity: 0, height: 0, y: -10 }} className="overflow-hidden mb-5">
                   <div className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 p-4 rounded-2xl flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <p className="text-sm font-bold">{error}</p>
@@ -162,66 +147,23 @@ export default function RegisterPage() {
 
             <AnimatePresence mode="wait">
               {step === 1 ? (
-                <motion.form 
-                  key="step1"
-                  onSubmit={handleRequestToken}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-5"
-                >
+                <motion.form key="step1" onSubmit={handleRequestToken} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">
-                      Nome do Operador
-                    </label>
-                    <input 
-                      type="text" 
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      placeholder="Seu Nome Completo"
-                    />
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Nome do Operador</label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600" placeholder="Seu Nome Completo" />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">
-                      E-mail Institucional
-                    </label>
-                    <input 
-                      type="email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600"
-                      placeholder="operador@creator.studio"
-                    />
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">E-mail Institucional</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600" placeholder="operador@creator.studio" />
                   </div>
 
-                  <Button 
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-zinc-900 dark:bg-primary text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] h-16 hover:bg-zinc-800 dark:hover:bg-primary-hover transition-all active:scale-95 font-heading flex items-center justify-center gap-4 group/btn mt-6"
-                  >
-                    {isLoading ? (
-                      <span className="animate-pulse">Autenticando e-mail...</span>
-                    ) : (
-                      <>
-                        Receber Código de Acesso
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
-                      </>
-                    )}
+                  <Button type="submit" disabled={isLoading} className="w-full bg-zinc-900 dark:bg-primary text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] h-16 hover:bg-zinc-800 dark:hover:bg-primary-hover transition-all active:scale-95 font-heading flex items-center justify-center gap-4 group/btn mt-6">
+                    {isLoading ? <span className="animate-pulse">Autenticando e-mail...</span> : <>Receber Código de Acesso<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" /></>}
                   </Button>
                 </motion.form>
               ) : (
-                <motion.form 
-                  key="step2"
-                  onSubmit={handleRegister}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="space-y-5"
-                >
+                <motion.form key="step2" onSubmit={handleRegister} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-5">
                   <div className="bg-primary/10 border border-primary/20 text-primary p-4 rounded-2xl flex items-start gap-3 mb-6">
                     <MailCheck className="w-5 h-5 shrink-0 mt-0.5" />
                     <div>
@@ -231,71 +173,28 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">
-                      Código Recebido no Terminal
-                    </label>
-                    <input 
-                      type="text" 
-                      value={token}
-                      onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      required
-                      className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-center text-xl tracking-[0.5em] font-black focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 font-mono"
-                      placeholder="000000"
-                    />
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Código Recebido no Terminal</label>
+                    <input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))} required className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-center text-xl tracking-[0.5em] font-black focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 font-mono" placeholder="000000" />
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">
-                      Criar Senha de Acesso
-                    </label>
-                    <input 
-                      type="password" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 font-mono tracking-widest"
-                      placeholder="••••••••"
-                    />
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-2">Criar Senha de Acesso</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full bg-zinc-50 dark:bg-zinc-900/50 border-2 border-transparent rounded-2xl px-6 py-4 text-sm font-bold focus:border-primary/30 focus:bg-white dark:focus:bg-zinc-800 transition-all outline-none dark:text-zinc-100 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 font-mono tracking-widest" placeholder="••••••••" />
                   </div>
 
-                  <Button 
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-zinc-900 dark:bg-primary text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] h-16 hover:bg-zinc-800 dark:hover:bg-primary-hover transition-all active:scale-95 font-heading flex items-center justify-center gap-4 group/btn mt-6"
-                  >
-                    {isLoading ? (
-                      <span className="animate-pulse">Validando Credencial...</span>
-                    ) : (
-                      <>
-                        Confirmar e Acessar
-                        <Zap className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-                      </>
-                    )}
+                  <Button type="submit" disabled={isLoading} className="w-full bg-zinc-900 dark:bg-primary text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] h-16 hover:bg-zinc-800 dark:hover:bg-primary-hover transition-all active:scale-95 font-heading flex items-center justify-center gap-4 group/btn mt-6">
+                    {isLoading ? <span className="animate-pulse">Validando Credencial...</span> : <>Confirmar e Acessar<Zap className="w-4 h-4 group-hover/btn:scale-110 transition-transform" /></>}
                   </Button>
                   
                   <div className="pt-2 text-center">
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        setStep(1);
-                        setError(null);
-                      }}
-                      className="text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-primary transition-colors"
-                    >
-                      Voltar e corrigir e-mail
-                    </button>
+                    <button type="button" onClick={() => { setStep(1); setError(null); }} className="text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-primary transition-colors">Voltar e corrigir e-mail</button>
                   </div>
                 </motion.form>
               )}
             </AnimatePresence>
 
             <div className="pt-6 text-center mt-4 border-t border-zinc-100 dark:border-zinc-700/50">
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                Já é operador?{' '}
-                <a href="/login" className="text-primary hover:underline hover:opacity-80 transition-all ml-1">
-                  Iniciar Sessão
-                </a>
-              </p>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Já é operador? <a href="/login" className="text-primary hover:underline hover:opacity-80 transition-all ml-1">Iniciar Sessão</a></p>
             </div>
           </motion.div>
         </div>
