@@ -9,21 +9,23 @@ import { ThemeToggle } from "../../components/shared/ThemeToggle";
 import { ThemeColorPicker } from "../../components/shared/ThemeColorPicker";
 
 // ============================================================================
-// BACK-END INTEGRATION MOCK
+// BACK-END INTEGRATION
 // ============================================================================
-// O desenvolvedor de back-end deve substituir a função abaixo pela chamada 
-// real para a API (ex: usando fetch ou axios).
 const authenticateUser = async (credentials: { email: string; password: string }) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Simulação de regra de negócio simples (Remova depois e use a API real)
-      if (credentials.email === "operador@creator.studio" && credentials.password === "123456") {
-        resolve({ token: "fake-jwt-token-123", user: { name: "Operador", role: "Admin" } });
-      } else {
-        reject(new Error("Credenciais inválidas. Verifique o e-mail e a senha digitados."));
-      }
-    }, 1500);
+  const response = await fetch("http://localhost:8080/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Erro ao conectar com o servidor.");
+  }
+
+  return response.json();
 };
 // ============================================================================
 
